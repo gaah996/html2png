@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+  <title>Document</title>
+  <script src="domtoimage.min.js"></script>
+  <script src="jszip.min.js"></script>
+  <script src="fileSaver.min.js"></script>
+  <script>
+    setTimeout(function() {
+      domtoimage.toJpeg(document.querySelector('.image')).then(function(dataUrl) {
+        // var img = new Image();
+        // img.src = dataUrl;
+        // document.body.appendChild(img);
+
+        var img = dataURItoBlob(dataUrl);
+        var zip = new JSZip();
+        var folder = zip.folder('images');
+        folder.file("image.jpeg", img, {base64:true});
+
+        zip.generateAsync({type: "blob"}).then(function(content) {
+          saveAs(content, "example.zip");
+        });
+      });
+    }, 2000);
+
+    function dataURItoBlob(dataURI) {
+      // convert base64 to raw binary data held in a string
+      // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+      var byteString = atob(dataURI.split(',')[1]);
+
+      // separate out the mime component
+      var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+
+      // write the bytes of the string to an ArrayBuffer
+      var ab = new ArrayBuffer(byteString.length);
+
+      // create a view into the buffer
+      var ia = new Uint8Array(ab);
+
+      // set the bytes of the buffer to the correct values
+      for (var i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+      }
+
+      // write the ArrayBuffer to a blob, and you're done
+      var blob = new Blob([ab], {type: mimeString});
+      return blob;
+
+    }
+  </script>
+  <style>
+    .image {
+      background-image: url('https://images.pexels.com/photos/414612/pexels-photo-414612.jpeg');
+      background-size: cover;
+      width: 500px;
+      height: 500px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .image h1 {
+      color: white;
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div style="opacity: 0; position: absolute; top: -500px; left: -500px;">
+    <div class="image">
+      <h1>Teste</h1>
+    </div>
+  </div>
+</body>
+</html>
